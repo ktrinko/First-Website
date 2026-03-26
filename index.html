@@ -2,10 +2,91 @@
 <html>
   <head>
     <title>My First Website</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .bar {
+        fill: steelblue;
+      }
+      .bar:hover {
+        fill: orange;
+      }
+      .label {
+        fill: black;
+        font-size: 12px;
+        text-anchor: middle;
+      }
+    </style>
   </head>
   <body>
     <h1>Hello world!</h1>
     <p>This is my very first website!</p>
     <p>This will be published on Github-Pages</p>
+
+    <!-- Hier kommt die Grafik -->
+    <svg id="chart" width="500" height="300"></svg>
+
+    <script>
+      const data = [
+        { name: "A", value: 1 },
+        { name: "B", value: 5 },
+        { name: "C", value: 8 },
+        { name: "D", value: 10 },
+      ];
+
+      const svg = d3.select("#chart");
+      const width = +svg.attr("width");
+      const height = +svg.attr("height");
+      const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+
+      const x = d3
+        .scaleBand()
+        .domain(data.map((d) => d.name))
+        .range([margin.left, width - margin.right])
+        .padding(0.1);
+
+      const y = d3
+        .scaleLinear()
+        .domain([0, d3.max(data, (d) => d.value)])
+        .nice()
+        .range([height - margin.bottom, margin.top]);
+
+      // X-Achse
+      svg
+        .append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x));
+
+      // Y-Achse
+      svg
+        .append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y));
+
+      // Balken
+      svg
+        .selectAll(".bar")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", (d) => x(d.name))
+        .attr("y", (d) => y(d.value))
+        .attr("height", (d) => y(0) - y(d.value))
+        .attr("width", x.bandwidth());
+
+      // Labels auf den Balken
+      svg
+        .selectAll(".label")
+        .data(data)
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("x", (d) => x(d.name) + x.bandwidth() / 2)
+        .attr("y", (d) => y(d.value) - 5)
+        .text((d) => d.value);
+    </script>
   </body>
 </html>
